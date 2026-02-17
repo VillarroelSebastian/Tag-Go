@@ -1,0 +1,116 @@
+.login-container {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(30, 41, 59, 0.75);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  backdrop-filter: blur(10px);
+  padding: 34px;
+  border-radius: 18px;
+  box-shadow: 0 18px 60px rgba(0, 0, 0, 0.45);
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+
+.brand-badge {
+  width: 36px;
+  height: 36px;
+  border-radius: 12px;
+  background: rgba(59,130,246,0.18);
+  border: 1px solid rgba(59,130,246,0.35);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  color: var(--text-main);
+}
+
+.login-title {
+  font-size: 22px;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.login-subtitle {
+  color: var(--text-secondary);
+  margin-bottom: 22px;
+  font-size: 14px;
+}
+
+.input-group {
+  margin-bottom: 14px;
+}
+
+.input-group label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.input-group input {
+  width: 100%;
+  padding: 12px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.18);
+  background-color: rgba(51, 65, 85, 0.55);
+  color: var(--text-main);
+  outline: none;
+}
+
+.input-group input:focus {
+  border-color: rgba(59, 130, 246, 0.8);
+  box-shadow: 0 0 0 4px rgba(59,130,246,0.18);
+}
+
+.login-button {
+  width: 100%;
+  padding: 12px;
+  background-color: var(--primary);
+  border: none;
+  border-radius: 12px;
+  color: white;
+  font-weight: 700;
+  cursor: pointer;
+  transition: 0.15s ease;
+  margin-top: 6px;
+}
+
+.login-button:hover { background-color: var(--primary-hover); }
+.login-button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.toggle-mode {
+  margin-top: 14px;
+  text-align: center;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.toggle-mode button {
+  background: transparent;
+  border: none;
+  color: rgba(96, 165, 250, 1);
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.error-box {
+  background-color: rgba(239, 68, 68, 0.14);
+  border: 1px solid rgba(239, 68, 68, 0.25);
+  padding: 10px 12px;
+  border-radius: 12px;
+  margin-bottom: 14px;
+  color: #fecaca;
+  font-size: 13px;
+}
