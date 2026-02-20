@@ -1,7 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import "../styles/forms.css";
 import "../styles/adminPro.css";
 import { listTicketsByStatus } from "../services/ticketService";
+
+// Sub-componente para consistencia de KPIs
+const StatCard = ({ title, value, subtitle, type = "default" }) => (
+  <div className={`card-stat ${type}`}>
+    <span className="stat-label">{title}</span>
+    <div className="stat-value">{value}</div>
+    {subtitle && <span className="stat-subtitle">{subtitle}</span>}
+  </div>
+);
 
 export default function Dashboard() {
   const [loading, setLoading] = useState(false);
@@ -9,18 +18,24 @@ export default function Dashboard() {
   const [activeCount, setActiveCount] = useState(0);
   const [recentClosed, setRecentClosed] = useState([]);
 
+  // Formateador configurado para Bolivia (Bs)
+  const currencyFormatter = new Intl.NumberFormat('es-BO', {
+    style: 'currency',
+    currency: 'BOB',
+  });
+
   async function load() {
     setErr("");
     setLoading(true);
     try {
-      const active = await listTicketsByStatus({ status: "ACTIVE", limitN: 200 });
+      const [active, closed] = await Promise.all([
+        listTicketsByStatus({ status: "ACTIVE", limitN: 200 }),
+        listTicketsByStatus({ status: "CLOSED", limitN: 50 })
+      ]);
       setActiveCount(active.length);
-
-      const closed = await listTicketsByStatus({ status: "CLOSED", limitN: 10 });
       setRecentClosed(closed);
     } catch (e) {
-      console.error("Dashboard load error:", e);
-      setErr(e?.message || "No se pudo cargar el dashboard.");
+      setErr("Error de conexión. No se pudieron sincronizar las métricas.");
     } finally {
       setLoading(false);
     }
@@ -28,74 +43,133 @@ export default function Dashboard() {
 
   useEffect(() => { load(); }, []);
 
-  const revenueRecent = recentClosed.reduce(
-    (sum, t) => sum + Number(t.priceAtClose || 0),
-    0
-  );
+  const stats = useMemo(() => {
+    const total = recentClosed.reduce((sum, t) => sum + Number(t.priceAtClose || 0), 0);
+    const count = recentClosed.length;
+    const distribution = recentClosed.reduce((acc, t) => {
+      const label = t.itemType || "Otros";
+      acc[label] = (acc[label] || 0) + 1;
+      return acc;
+    }, {});
+
+    return { total, avg: count > 0 ? total / count : 0, distribution, count };
+  }, [recentClosed]);
+
+  // Lógica de Exportación a Excel ajustada
+  const exportToExcel = () => {
+    if (recentClosed.length === 0) return;
+
+    const csvContent = [
+      "sep=,", 
+      "Token,Categoria,Monto (Bs),Fecha",
+      ...recentClosed.map(t => 
+        `${t.token},${t.itemType || 'N/A'},${t.priceAtClose || 0},${new Date().toLocaleDateString()}`
+      )
+    ].join("\n");
+    
+    const blob = new Blob(["\uFEFF" + csvContent], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.setAttribute("download", `reporte_ventas_bs_${new Date().toISOString().slice(0,10)}.csv`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
 
   return (
-    <div className="card">
-      <div className="toolbar">
-        <div className="toolbar-left">
-          <div>
-            <h2 style={{ marginBottom: 4 }}>Dashboard</h2>
-            <p className="muted">Resumen operativo rápido.</p>
+    <div className="dashboard-container">
+      <header className="dashboard-header">
+        <div>
+          <h1>Panel de Control</h1>
+          <p className="text-muted">Resumen de operaciones y métricas de cierre en Bs.</p>
+        </div>
+        
+        <div className="toolbar-right" style={{ display: 'flex', gap: '12px' }}>
+          <button className="btn btn-primary" onClick={exportToExcel}>
+             Excel (.csv)
+          </button>
+          
+          <button className="btn btn-primary" onClick={() => window.print()}>
+             Imprimir PDF
+          </button>
+
+          <button 
+            className="btn btn-secondary" 
+            onClick={load} 
+            disabled={loading}
+          >
+            {loading ? "Cargando..." : "Actualizar"}
+          </button>
+        </div>
+      </header>
+
+      {err && <div className="error-box" style={{ marginBottom: '20px' }}>{err}</div>}
+
+      <div className="stats-grid">
+        <StatCard 
+          title="Tickets Activos" 
+          value={activeCount} 
+          subtitle="Pendientes en tablero"
+        />
+        <StatCard 
+          title="Ingresos Totales" 
+          value={currencyFormatter.format(stats.total)} 
+          subtitle={`Últimos ${stats.count} cierres`}
+          type="success"
+        />
+        <StatCard 
+          title="Venta Promedio" 
+          value={currencyFormatter.format(stats.avg)} 
+          subtitle="Valor medio por ticket"
+          type="info"
+        />
+        {/* Eficiencia eliminada según solicitud */}
+      </div>
+
+      <div className="dashboard-content-grid" style={{ marginTop: '24px' }}>
+        <div className="card shadow-sm">
+          <h3 className="card-title">Distribución por Categoría</h3>
+          <div className="distribution-list">
+            {Object.entries(stats.distribution).map(([label, val]) => {
+              const percentage = ((val / stats.count) * 100).toFixed(1);
+              return (
+                <div key={label} className="dist-item">
+                  <div className="dist-info">
+                    <span>{label}</span>
+                    <span className="text-bold">{percentage}%</span>
+                  </div>
+                  <div className="progress-bar-bg">
+                    <div className="progress-bar-fill" style={{ width: `${percentage}%` }}></div>
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
 
-        <div className="toolbar-right">
-          <button className="btn" onClick={load} disabled={loading}>
-            {loading ? "Actualizando..." : "Actualizar"}
-          </button>
-        </div>
-      </div>
-
-      {err && <div className="error-box" style={{ marginBottom: 12 }}>{err}</div>}
-
-      <div className="grid-2" style={{ marginTop: 14 }}>
-        <div className="card">
-          <div className="muted">Tickets activos</div>
-          <div style={{ fontWeight: 900, fontSize: 28 }}>{activeCount}</div>
-        </div>
-
-        <div className="card">
-          <div className="muted">Ingresos (últimos 10 cierres)</div>
-          <div style={{ fontWeight: 900, fontSize: 28 }}>{revenueRecent}</div>
-        </div>
-      </div>
-
-      <div style={{ marginTop: 14 }}>
-        <div style={{ fontWeight: 900, marginBottom: 8 }}>Últimos tickets cerrados</div>
-
-        <div className="table-wrap">
-          <table className="table-pro" style={{ minWidth: 640 }}>
-            <thead>
-              <tr>
-                <th>Token</th>
-                <th>Tipo</th>
-                <th>Cant.</th>
-                <th>Total</th>
-              </tr>
-            </thead>
-            <tbody>
-              {recentClosed.map((t) => (
-                <tr key={t.id}>
-                  <td style={{ fontWeight: 900 }}>{t.token}</td>
-                  <td>{t.itemType}</td>
-                  <td>{t.quantity}</td>
-                  <td style={{ fontWeight: 900 }}>{t.priceAtClose ?? "-"}</td>
-                </tr>
-              ))}
-
-              {recentClosed.length === 0 && (
+        <div className="card shadow-sm">
+          <h3 className="card-title">Auditoría de Cierres (Bs)</h3>
+          <div className="table-responsive">
+            <table className="admin-table">
+              <thead>
                 <tr>
-                  <td colSpan="4" className="muted" style={{ padding: 14 }}>
-                    Aún no hay cierres.
-                  </td>
+                  <th>Referencia</th>
+                  <th>Categoría</th>
+                  <th className="text-right">Monto Final</th>
                 </tr>
-              )}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {recentClosed.slice(0, 7).map((t) => (
+                  <tr key={t.id}>
+                    <td className="text-mono">{t.token}</td>
+                    <td><span className="badge-light">{t.itemType}</span></td>
+                    <td className="text-right text-bold">{currencyFormatter.format(t.priceAtClose)}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       </div>
     </div>

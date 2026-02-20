@@ -13,6 +13,9 @@ import Tickets from "./pages/Tickets";
 import Pricing from "./pages/Pricing";
 import Branches from "./pages/Branches";
 
+// NUEVO
+import Users from "./pages/users";
+
 export default function App() {
   return (
     <BrowserRouter>
@@ -42,6 +45,9 @@ export default function App() {
           <Route path="tickets" element={<Tickets />} />
           <Route path="pricing" element={<Pricing />} />
           <Route path="branches" element={<Branches />} />
+
+          {/* NUEVO */}
+          <Route path="users" element={<Users />} />
         </Route>
 
         {/* fallback */}

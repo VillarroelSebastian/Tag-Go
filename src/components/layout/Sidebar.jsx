@@ -18,6 +18,9 @@ export default function Sidebar() {
         <NavLink to="/app/tickets">Tickets</NavLink>
         <NavLink to="/app/pricing">Tarifas</NavLink>
         <NavLink to="/app/branches">Sucursales</NavLink>
+
+        {/* NUEVO */}
+        <NavLink to="/app/users">Usuarios</NavLink>
       </nav>
     </aside>
   );

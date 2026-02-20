@@ -1,4 +1,6 @@
-/* Reutilizables pro */
+/* ==========================================================================
+   ESTILOS ORIGINALES (REUTILIZABLES PRO) - NO TOCAR
+   ========================================================================== */
 .toolbar {
   display: flex;
   gap: 10px;
@@ -37,6 +39,10 @@
   color: var(--text-main);
   cursor: pointer;
   font-weight: 800;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
 }
 .btn:hover { border-color: rgba(59,130,246,0.45); }
 
@@ -125,7 +131,7 @@
   width: 100%;
   max-width: 760px;
   border-radius: 18px;
-  border: 1px solid rgba(148,163,184,0.18);
+  border: 1px solid rgba(148, 163, 184, 0.18);
   background: rgba(15,23,42,0.75);
   backdrop-filter: blur(12px);
   padding: 14px;
@@ -139,3 +145,151 @@
 }
 .modal-title { font-weight: 900; font-size: 16px; }
 .modal-body { display: grid; gap: 12px; }
+
+/* ==========================================================================
+   NUEVOS ESTILOS PARA DASHBOARD Y REPORTES
+   ========================================================================== */
+
+/* Layout del Dashboard */
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.dashboard-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+/* Grid de KPIs */
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.card-stat {
+  padding: 24px;
+  background: rgba(15, 23, 42, 0.4);
+  border: 1px solid rgba(148, 163, 184, 0.15);
+  border-radius: 20px;
+  backdrop-filter: blur(10px);
+}
+
+.card-stat.success { border-left: 4px solid #22c55e; }
+.card-stat.info { border-left: 4px solid #3b82f6; }
+
+.stat-label { 
+  color: var(--text-secondary); 
+  font-size: 12px; 
+  font-weight: 800; 
+  text-transform: uppercase; 
+  letter-spacing: 0.5px;
+}
+
+.stat-value { 
+  font-size: 28px; 
+  font-weight: 900; 
+  margin: 8px 0; 
+  color: var(--text-main); 
+}
+
+.stat-subtitle { 
+  color: var(--text-secondary); 
+  font-size: 11px; 
+  opacity: 0.8;
+}
+
+/* Gráfico de Distribución (Barras) */
+.distribution-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  margin-top: 12px;
+}
+
+.dist-info {
+  display: flex;
+  justify-content: space-between;
+  font-size: 13px;
+  margin-bottom: 4px;
+}
+
+.progress-bar-bg {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 10px;
+  overflow: hidden;
+}
+
+.progress-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #3b82f6, #22c55e);
+  border-radius: 10px;
+  transition: width 0.8s ease-in-out;
+}
+
+/* Botón Secundario (para Actualizar) */
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(148, 163, 184, 0.2);
+  color: var(--text-main);
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(148, 163, 184, 0.5);
+}
+
+/* Utilidades de Tabla y Texto */
+.dashboard-content-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 20px;
+}
+
+@media (max-width: 1024px) {
+  .dashboard-content-grid { grid-template-columns: 1fr; }
+}
+
+.admin-table { width: 100%; border-collapse: collapse; }
+.admin-table th { 
+  color: var(--text-secondary); 
+  font-size: 11px; 
+  text-transform: uppercase; 
+  padding: 12px; 
+  text-align: left; 
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+}
+.admin-table td { 
+  padding: 12px; 
+  border-bottom: 1px solid rgba(148, 163, 184, 0.05); 
+  font-size: 13px; 
+}
+
+.text-mono { font-family: 'JetBrains Mono', monospace; color: #3b82f6; font-weight: 600; }
+.badge-light { 
+  background: rgba(255, 255, 255, 0.05); 
+  padding: 4px 8px; 
+  border-radius: 6px; 
+  font-size: 11px; 
+  font-weight: 700;
+}
+
+/* Estilos de Impresión (PDF) */
+@media print {
+  .btn, .toolbar-right, .dashboard-header button {
+    display: none !important;
+  }
+  body { background: white !important; color: black !important; }
+  .card, .card-stat {
+    border: 1px solid #eee !important;
+    background: white !important;
+    color: black !important;
+    box-shadow: none !important;
+    backdrop-filter: none !important;
+  }
+  .stat-value, .text-bold { color: black !important; }
+}
